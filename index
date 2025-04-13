@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MANU'S math logic puzzle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #f5f5f5;
+            padding: 20px;
+            gap: 40px;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 120px);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .cell {
+            width: 120px;
+            height: 80px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 70px;
+            height: 70px;
+            text-align: center;
+            font-size: 24px;
+            border: none;
+            outline: none;
+        }
+        .correct {
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
+        }
+        .incorrect {
+            border-color: #f44336;
+            background-color: #ffebee;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        #unlocked-links {
+            width: 300px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        #unlocked-links h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        #links-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #links-list li {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+        #links-list a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .pista-descripcion {
+            font-size: 14px;
+            color: #555;
+            font-style: italic;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0d5bba;
+        }
+        
+        /* Estilos para la pantalla de inicio */
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 1000;
+        }
+        #start-content {
+            max-width: 800px;
+            padding: 40px;
+            background-color: #333;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        #start-content h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #rules {
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        #rules li {
+            margin-bottom: 10px;
+        }
+        #start-game {
+            background-color: #4CAF50;
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+        #start-game:hover {
+            background-color: #3e8e41;
+        }
+        
+        /* Estilos para la pantalla final */
+        #end-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            display: flex
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 2000;
+            text-align: center;
+            opacity: 0; /* Inicialmente transparente */
+             pointer-events: none; /* No interactuable al inicio */
+             transition: opacity 0.5s; /* Transición suave */
+        }
+        #end-content {
+            max-width: 600px;
+            padding: 40px;
+            background-color: #333;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        #end-content h1 {
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        .voucher {
+            border: 2px dashed #4CAF50;
+            padding: 20px;
+            margin: 20px 0;
+            background-color: #f8f8f8;
+            color: #333;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .bonus-track {
+            margin-top: 30px;
+            font-style: italic;
+        }
+        .signature {
+            margin-top: 30px;
+            font-size: 1.2em;
+            color: #4CAF50;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de inicio -->
+    <div id="start-screen">
+        <div id="start-content">
+            <h1>MANU'S MATH LOGIC PUZZLE</h1>
+            <div id="rules">
+                <h2>Reglas del juego:</h2>
+                <ul>
+                    <li>Completa la grilla de 5x5 con los números correctos.</li>
+                    <li>Colocar en A1 el número 12 para comenzar el juego</li>
+                    <li>Las pistas desbloqueadas aparecerán en el panel lateral. Clickear el link en el nombre de la pista para obtenerla</li>
+                    <li>No es necesario adivinar.</li>
+                    <li>Los pasos incluyen diagonales.</li>
+                </ul>
+            </div>
+            <button id="start-game">Comenzar</button>
+        </div>
+    </div>
+
+    <!-- Contenido principal del juego (oculto inicialmente) -->
+    <div class="container hidden" id="game-container">
+        <h1>MANU'S math logic puzzle</h1>
+        <div class="grid" id="grid"></div>
+        <p id="result">Completa la grilla según la solución predefinida</p>
+        <button id="resetBtn">Reiniciar</button>
+    </div>
+
+    <div id="unlocked-links" class="hidden">
+        <h2>Pistas desbloqueadas</h2>
+        <ul id="links-list"></ul>
+    </div>
+
+    <!-- Pantalla de finalización -->
+    <div id="end-screen">
+        <div id="end-content">
+            <h1>🎉 Felicidades MANU ganaste! 🎉</h1>
+            <p>Ahora podés reclamar tu premio:</p>
+            <div class="voucher">VALE POR UN REGALO</div>
+            
+            <div class="bonus-track">
+                <p>Bonus track: te dejamos el link de los videos por si querés revisitarlos:</p>
+                <a href="https://drive.google.com/drive/folders/1IOkjG2bnCnUPRNakCxvnaAgEf8UUQOM0?usp=drive_link" 
+                   target="_blank" 
+                   style="color: #1a73e8;">
+                    Ver videos
+                </a>
+            </div>
+            
+            <div class="signature">
+                Con cariño, te queremos, MATEBROS ❤️
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const resultDisplay = document.getElementById('result');
+        const resetBtn = document.getElementById('resetBtn');
+        const linksList = document.getElementById('links-list');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-game');
+        const gameContainer = document.getElementById('game-container');
+        const unlockedLinksContainer = document.getElementById('unlocked-links');
+        const endScreen = document.getElementById('end-screen');
+        let unlockedLinks = [];
+
+        // =============================================
+        // EDITABLE: Grilla maestra y enlaces de YouTube
+        // =============================================
+        const masterGrid = [
+            12, 9, 6, 5, 3,
+            20, 25, 17, 16, 11,
+            10, 13, 1, 22, 23,
+            15, 8, 21, 7, 19,
+            4, 18, 14, 24, 2
+        ];
+
+        const youtubeLinks = {
+            1: "https://drive.google.com/file/d/1J9yLqq6cFMDDO4g8V6aFXgc74SUIfpZU/view?usp=drive_link",
+            2: "https://drive.google.com/file/d/1ITL-pmQE5g0N1vLPMLD85eSzrGTUX95_/view?usp=drive_link",
+            3: "https://drive.google.com/file/d/1C1qiefhKjDVl1gAEGQhHYQivxJJebEqX/view?usp=drive_link",
+            4: "https://drive.google.com/file/d/1J6qH4EKTQJQIVX_QFKcpNvNLk9BZhZYy/view?usp=drive_link",
+            5: "https://drive.google.com/file/d/1Xs1QsyF_jF3HoErpssufnK-g-XYnH6GK/view?usp=drive_link",
+            6: "https://youtube.com/shorts/YbHlF4vBkUY?si=ZyZ5z2snQ-8vpSzh",
+            7: "https://drive.google.com/file/d/1IWmxPXJ4q_8ANzGJvyz5qIUB5Vs-napZ/view?usp=drive_link",
+            8: "https://drive.google.com/file/d/1K3SW-U-6CWVZrdSvEvfkkshAk8r4C72p/view?usp=drive_link",
+            9: "https://drive.google.com/file/d/11HIQawUdTXFY_sltWAYL6WBNrxIBeQzh/view?usp=drive_link",
+            10: "https://drive.google.com/file/d/1JL0b252lAmWNJtUa5PvjGERzbefROWvh/view?usp=drive_link",
+            11: "https://drive.google.com/file/d/1yep9JbcD7ZqULkqDKxZMFbC-TGJ3uGvV/view?usp=drive_link",
+            12: "https://drive.google.com/file/d/1hRkJnZSy9CAP3VavlfYnMx42HdX-k5zA/view?usp=drive_link",
+            13: "https://drive.google.com/file/d/1jtHHrr2sg74_AKProBs67Th13DFPpUtA/view?usp=drive_link",
+            14: "https://youtu.be/-eMCHSkNsnI?si=qPubhnEf9-ozadcH",
+            15: "https://drive.google.com/file/d/176YQIjV5wL_OiEybSg9i2tEPV-V51Wzi/view?usp=drive_link",
+            16: "https://drive.google.com/file/d/1J-S2SEqBR9YTgqQpbeZeSHxfREokKumy/view?usp=drive_link",
+            17: "https://drive.google.com/file/d/1PxAyxAZZLPALtJ4vr-p4Nv6EsSlulfXw/view?usp=drive_link",
+            18: "https://drive.google.com/file/d/1STvqCuz2Q6unMg4pXEeDB-t2Evdv-_DW/view?usp=drive_link",
+            19: "https://drive.google.com/file/d/1bXlL1t28__fqRnH8LOcbbWtOJV1Tyujt/view?usp=drive_link",
+            20: "https://youtu.be/jmF0edcnw4w?si=TDvZgDChxMI-Zm-H",
+            21: "https://drive.google.com/file/d/14m2IRq92yKjlwsCA6rx_Jljf54Jsy948/view?usp=drive_link",
+            22: "https://drive.google.com/file/d/1JEK346VYvsQhaNttbgt2UmzhLj2QoIFv/view?usp=drive_link",
+            23: "https://drive.google.com/file/d/1rsao2cbCoSrWAye0n4e8zNLfzRnG2qV1/view?usp=drive_link",
+            24: "https://drive.google.com/file/d/1zcQDsldWgL26DXf9X_kAsWELRgFkMlll/view?usp=drive_link",
+            25: "https://drive.google.com/file/d/1JCXrZdQuDrTrOWmpZ6DNrC9w96Cig2lc/view?usp=drive_link"
+        };
+        
+        const pistaDescriptions = {
+            1: "16 y 23",
+            2: "Primos grandes",
+            3: "Diagonal 3",
+            4: "Diagonal primos 2",
+            5: "D5",
+            6: "D5",
+            7: "",
+            8: "Divisores del 22",
+            9: "10 y 20",
+            10: "Orden primera fila",
+            11: "Cuadrados perfectos",
+            12: "Esquinas",
+            13: "",
+            14: "",
+            15: "C2",
+            16: "Suma quinta columna",
+            17: "",
+            18: "Primos primera columna",
+            19: "Sumatoria tercera fila",
+            20: "D4",
+            21: "",
+            22: "Diagonales de esta",
+            23: "Matriz",
+            24: "7 multiplos y divisores",
+            25: "Columna anterior y siguiente, suma primera fila"
+        };
+
+        // Crear grilla 5x5 vacía
+        function createEmptyGrid() {
+            grid.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.placeholder = '0';
+                
+                input.addEventListener('input', (e) => validateNumber(e.target.value, i, cell));
+                
+                cell.appendChild(input);
+                grid.appendChild(cell);
+            }
+        }
+
+        function validateNumber(value, position, cell) {
+            if (value === '') {
+                cell.classList.remove('correct', 'incorrect');
+                resultDisplay.textContent = 'Ingresa números en la grilla...';
+                return;
+            }
+
+            const expectedValue = masterGrid[position];
+            const num = parseInt(value);
+
+            if (num === expectedValue) {
+                cell.classList.add('correct');
+                cell.classList.remove('incorrect');
+                
+                const newLink = {
+                    num: num,
+                    text: `Pista ${num}`,
+                    url: youtubeLinks[num] || `https://youtube.com/search?q=Pista+${num}`,
+                    description: pistaDescriptions[num] || ""
+                };
+                
+                if (!unlockedLinks.some(link => link.num === num)) {
+                    unlockedLinks.push(newLink);
+                    updateLinksList();
+                }
+                
+                // Verificar si se completó todo el puzzle
+                checkPuzzleCompletion();
+                
+                resultDisplay.innerHTML = `¡Correcto! <a id="link" href="${newLink.url}" target="_blank">${newLink.text}</a>`;
+            } else {
+                cell.classList.add('incorrect');
+                cell.classList.remove('correct');
+                resultDisplay.textContent = "Incorrecto. Sigue intentando.";
+            }
+        }
+
+        function checkPuzzleCompletion() {
+            const cells = document.querySelectorAll('.cell input');
+            let allCorrect = true;
+    
+            cells.forEach((input, index) => {
+                if (!input.value || parseInt(input.value) !== masterGrid[index]) {
+                  allCorrect = false;
+                }
+            });
+    
+              if (allCorrect) {
+                  endScreen.style.opacity = 1;
+                  endScreen.style.pointerEvents = 'auto';
+                  gameContainer.classList.add('hidden');
+                  unlockedLinksContainer.classList.add('hidden');
+                  window.scrollTo(0, 0);
+              }
+        }
+
+        function updateLinksList() {
+            linksList.innerHTML = '';
+            unlockedLinks.forEach(link => {
+                const li = document.createElement('li');
+                
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.text;
+                a.target = '_blank';
+                
+                const desc = document.createElement('div');
+                desc.className = 'pista-descripcion';
+                desc.textContent = link.description;
+                
+                li.appendChild(a);
+                li.appendChild(desc);
+                linksList.appendChild(li);
+            });
+        }
+
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameContainer.classList.remove('hidden');
+            unlockedLinksContainer.classList.remove('hidden');
+            createEmptyGrid();
+            resultDisplay.textContent = 'Coloque el 12 en la posición A1';
+        }
+
+        resetBtn.addEventListener('click', () => {
+            createEmptyGrid();
+            unlockedLinks = [];
+            updateLinksList();
+            endScreen.style.opacity = 0;
+            endScreen.style.pointerEvents = 'none';
+            resultDisplay.textContent = 'Coloque el 12 en la posición A1';
+        });
+
+        startButton.addEventListener('click', startGame);
+
+        // Inicializar
+        createEmptyGrid();
+    </script>
+</body>
+</html>
